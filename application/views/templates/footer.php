@@ -14,6 +14,12 @@
 <script src="<?php echo base_url('assets/js/'); ?>myscript1.js"></script>
 <script src="<?php echo base_url('assets/js/'); ?>myscript2.js"></script>
 
+<script type="text/javascript" src="<?php echo base_url(); ?>assets/moment-develop/moment.js"></script>
+<script type="text/javascript" src="<?php echo base_url(); ?>assets/bootstrap-datetimepicker.js"></script>
+
+<script src="//cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+
 <script type="text/javascript">
     $(document).on("click", "#tombolEditUnitKerja", function() {
         var unit_kerja_id = $(this).data('unit_kerja_id');

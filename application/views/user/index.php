@@ -1,276 +1,368 @@
-<!-- Begin Page Content -->
-<div class="container-fluid">
+<link rel="stylesheet" href="<?=base_url('');?>assets/css/attendance.css">
 
-	<!-- Page Heading -->
+<div class="container-fluid" style="margin-bottom:100px;">
+    <h3 style="margin-top:50px;">
+        <center>
+            <p><span id="tanggalwaktu"></span></p>
+        </center>
+    </h3>
 
-	<?php
-	$email = $user['email'];
-	$nama = $user['nama'];
-	$foto = $user['foto'];
-	$level_id = $user['level_id'];
-	$level_name = $this->db->get_where('user_level', ['level_id' => $user['level_id']])->row()->level_name;
-	?>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <br>
+            <center>
+                <h3>
+                    <div style="height:50px;" id="txtDatang"></div>
+                    <button id="buttonDatang" class="btn" onclick="absence()">Datang</button>
+                </h3>
+            </center>
+        </div>
 
-	<!-- Content Row -->
-	<div class="row">
+        <div class="col-lg-6 mb-4">
+            <br>
+            <center>
+                <h3>
+                    <div style="height:50px;" id="txtPulang"></div>
+                    <button id="buttonPulang" class="btn" onclick="absencePulang()">Pulang</button>
+                </h3>
+            </center>
+        </div>
+    </div>
 
-		<!-- Content Column -->
-		<div class="col-lg-6 mb-4">
-			<?php echo $this->session->flashdata('pesan'); ?>
-			<div class="card mb-3" style="max-width: 540px;">
-				<div class="row no-gutters">
-					<div class="col-md-6">
-						<img class="img-fluid p-3" src="<?php echo base_url('assets/img/profil/') . $foto; ?>">
-					</div>
-					<div class="col-md-6">
-						<div class="card-body">
-							<form>
-								<div class="form-group">
-									<label for="nama">Nama</label>
-									<input type="text" readonly class="form-control" id="nama" name="nama" value="<?php echo $nama; ?>">
-								</div>
-								<div class="form-group">
-									<label for="email">Email</label>
-									<input type="text" readonly class="form-control" id="email" nama="email" value="<?php echo $email; ?>">
-								</div>
-								<div class="form-group">
-									<label for="email">Level</label>
-									<input type="text" readonly class="form-control" id="email" nama="email" value="<?php echo $level_name; ?>">
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-			<a href="<?php echo base_url('user/edit_profil'); ?>" class="btn btn-success">Edit</a>
+    <hr>
+    <br>
 
-		</div>
+    <center>
+        <div class="card border-dark " style="max-width: 70rem; ">
+            <div class="card-body text-dark">
+                <table style="font-family: arial; font-size: 12px;">
+                    <tr>
+                        <th>No.Job</th>
+                        <th>Judul</th>
+                        <th>Rencana Mulai</th>
+                        <th>Rencana Selesai</th>
+                        <th>Level</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>5</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    <center>
 
-		<div class="col-md-6 mb-9">
+    <!-- Pie -->
+    <div class="margin-section" style="margin-bottom:50px">
+        <div class="pie animate" style="--p:80;--c:red;--b:15px">60</div>
+        <div class="pie animate" style="--p:80;--c:blue">80</div>
 
-			<?php if ($level_id != 7) { ?>
-				<div class="gallery">
-					<center><a target="_blank" href="http://absensi.penerbitduta.top/">
-							<img class="img-fluid p-3 mt-3" src="<?php echo base_url('assets/img/') . 'iconpermintaan.png'; ?>" width="300" height="200">
-						</a></center><br>
-					<center>Login Absensi Karyawan <br></center>
-					<center><a href="http://absensi.penerbitduta.top/" target="_blank" rel="nofollow" class="btn" title="Aplikasi Absensi Penerbit Duta">Go</a></center>
-				</div>
-			<?php } ?>
+        <br>
+        <br>
 
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary" type="button">Button</button>
+            <button class="btn btn-primary" type="button">Button</button>
+        </div>
+    </div>
 
+    <hr>
 
+    <!-- Riwayat Kehadiran -->
+    <div class="margin-section">
+        <center>
+            <h5><b>Riwayat Kehadiran</b></h5>
+        </center>
 
-		</div>
-	</div>
+        <div class="col-lg-12" style="margin-top:10px;background-color:#f0e9dd;border-radius:10px;padding:20px;">
+            <div class="col-lg-12 d-flex justify-content-between">
+                <div class="row">
+                    <div class="form-group col">
+                        <label><b>Tanggal Mulai</b></label>
+                        <input type="text" id="filter-tanggal-mulai" class="form-control date" data-date-format="DD/MM/YYYY" placeholder="dd/mm/yyyy">
+                    </div>
+                    <div class="form-group col">
+                        <label><b>Tanggal Akhir</b></label>
+                        <input type="text" id="filter-tanggal-sampai" class="form-control date" data-date-format="DD/MM/YYYY" placeholder="dd/mm/yyyy">
+                    </div>
+                    <div class="form-group col">
+                        <label><b>Karyawan</b></label>
+                        <select class="form-control" id="filter-karyawan">
+                            <option width="50px" />
+                            <?php
+                                $this->db->order_by('nama', 'ASC');
+                                foreach($this->db->get('t_karyawan')->result() as $kar){
+                                    if($kar->id_karyawan == $this->session->userdata('user_id')){
+                                        $selected = 'selected';
+                                    } else {
+                                        $selected = '';
+                                    }
 
+                                    echo "<option value='".$kar->id_karyawan."' ".$selected.">".$kar->nama."</option>";
+                                }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col">
+                        <label><b>&nbsp;</b></label>
+                        <button id="report-pdf" class="form-control date btn-info">Report PDF</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="attendance-table" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>NIK</th>
+                            <th>Nama</th>
+                            <th>Hari</th>
+                            <th>Tanggal</th>
+                            <th>Waktu Datang</th>
+                            <th>Datang Melalui</th>
+                            <th>Waktu Pulang</th>
+                            <th>Pulang Melalui</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-<!-- /.container-fluid -->
 
-</div>
-<!-- End of Main Content -->
+<script>
+    var tw = new Date();
+    
+    if (tw.getTimezoneOffset() == 0) {
+        (a=tw.getTime() + ( 7 *60*60*1000))
+    } else {
+        (a=tw.getTime());
+    }
 
+    tw.setTime(a);
 
-<!-- End of Content Wrapper -->
+    var tahun= tw.getFullYear ();
+    var hari= tw.getDay ();
+    var bulan= tw.getMonth ();
+    var tanggal= tw.getDate ();
+    var hariarray=new Array("Minggu,","Senin,","Selasa,","Rabu,","Kamis,","Jum'at,","Sabtu,");
+    var bulanarray=new Array("Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","Nopember","Desember");
+    
+    document.getElementById("tanggalwaktu").innerHTML = hariarray[hari]+" "+tanggal+" "+bulanarray[bulan]+" "+tahun+("");
+	
+    let timerTimeout
+    let timerTimeoutPulang
 
-</div>
-<!-- End of Page Wrapper -->
+    let absence
+    let absencePulang
 
-<!-- Scroll to Top Button-->
-<a class="scroll-to-top rounded" href="#page-top">
-	<i class="fas fa-angle-up"></i>
-</a>
+    let refreshAttendanceTable
 
+  	$(document).ready(function () {
+        // on load
+        checkAttendance()
+        
+        $("#filter-tanggal-mulai").datetimepicker({
+            pickTime: false
+        });
+        $("#filter-tanggal-sampai").datetimepicker({
+            pickTime: false
+        });
 
+        // on page load check atttendance status
+		function checkAttendance () {
+            $('#filter-tanggal-mulai').val('<?=date('d/m/Y', time())?>')
+            $('#filter-tanggal-sampai').val('<?=date('d/m/Y', time())?>')
 
-
-
-<style>
-	* {
-		box-sizing: border-box;
-	}
-
-	.row::after {
-		content: "";
-		clear: both;
-		display: table;
-	}
-
-	[class*="col-"] {
-		display: inline-block;
-		padding: 15px;
-	}
-
-	html {
-		font-family: "Lucida Sans", sans-serif;
-		background-color: #89D1D3;
-		display: inline-block;
-	}
-
-	.menu ul {
-		list-style-type: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.menu li {
-		padding: 8px;
-		margin-bottom: 7px;
-		background-color: #33b5e5;
-		color: #ffffff;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-	}
-
-	.menu li:hover {
-		background-color: #0099cc;
-	}
-
-	.aside {
-		background-color: #33b5e5;
-		padding: 15px;
-		color: #0099cc;
-		font-size: 14px;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-	}
-
-	.desc {
-		padding: 50px;
-		text-align: center;
-	}
-
-	/* For mobile phones: */
-	[class*="col-"] {
-		width: 100%;
-	}
-
-	@media only screen and (min-width: 600px) {
-
-		/* For tablets: */
-		.col-s-1 {
-			width: 8.33%;
+            const attendanceStatus = $.ajax({
+                url: '<?=base_url('user/check_attendance');?>',
+                type: 'POST',
+                success: function (data) {
+                    if (data == 'null') {
+                        startTime()
+                    } else {
+                        getAbsenceTime()
+                        checkAttendancePulang()
+                    }
+                }
+            })
 		}
 
-		.col-s-2 {
-			width: 16.66%;
+        function checkAttendancePulang () {
+            $.ajax({
+                url: '<?=base_url('user/check_attendance_pulang');?>',
+                type: 'POST',
+                success: function (data) {
+                    if (data == 'null') {
+                        $('#buttonDatang').attr('disabled', true)
+                        $('#buttonDatang').css('cursor', 'not-allowed')
+                        
+                        startTimerPulang()
+                    } else {
+                        getAbsenceTime()
+                        $('#buttonDatang').attr('disabled', true)
+                        $('#buttonDatang').css('cursor', 'not-allowed')
+                        
+                        $('#buttonPulang').attr('disabled', true)
+                        $('#buttonPulang').css('cursor', 'not-allowed')
+
+                        data = JSON.parse(data)
+                        const jamPulang = data.jam_pulang.split(' ')[1]
+
+                        document.getElementById('txtPulang').innerHTML = jamPulang
+                    }
+                }
+            })
+        }
+
+        function getAbsenceTime () {
+            $.ajax({
+                url: '<?=base_url('user/get_absence_time')?>',
+                type: 'GET',
+                success: function (data) {
+                    data = JSON.parse(data)
+                    const jamDatang = data.jam_datang.split(' ')[1]
+
+                    document.getElementById('txtDatang').innerHTML = jamDatang
+                }
+            })
+        }
+
+		function startTime() {
+            $('#buttonPulang').attr('disabled', true)
+            $('#buttonPulang').css('cursor', 'not-allowed')
+
+			const today = new Date();
+			let h = today.getHours();
+			let m = today.getMinutes();
+			let s = today.getSeconds();
+			m = checkTime(m);
+			s = checkTime(s);
+			document.getElementById('txtDatang').innerHTML =  h + ":" + m + ":" + s;
+			timerTimeout = setTimeout(startTime, 1000);
 		}
 
-		.col-s-3 {
-			width: 25%;
+        function startTimerPulang () {
+			const today = new Date();
+			let h = today.getHours();
+			let m = today.getMinutes();
+			let s = today.getSeconds();
+			m = checkTime(m);
+			s = checkTime(s);
+			document.getElementById('txtPulang').innerHTML =  h + ":" + m + ":" + s;
+			timerTimeoutPulang = setTimeout(startTimerPulang, 1000);
+        }
+
+		function checkTime(i) {
+			if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+			return i;
 		}
 
-		.col-s-4 {
-			width: 33.33%;
+		absence = function () {
+            $.ajax({
+                url: '<?=base_url('user/absence');?>',
+                type: 'POST',
+                success: function (success) {
+                    if (success == 'true') {
+                        clearTimeout(timerTimeout)
+                        
+                        $('#buttonDatang').attr('disabled', true)
+                        $('#buttonDatang').css('cursor', 'not-allowed')
+                        startTimerPulang()
+                        
+                        $('#buttonPulang').attr('disabled', false)
+                        $('#buttonPulang').css('cursor', 'pointer')
+                    } else {
+                        alert('Gagal absen masuk, harap refresh halaman lalu coba lagi.')
+                    }
+                }
+            })
 		}
 
-		.col-s-5 {
-			width: 41.66%;
-		}
+        absencePulang = function () {
+            $.ajax({
+                url: '<?=base_url('user/absence_pulang')?>',
+                success: function (success) {
+                    if (success == 'true') {
+                        clearTimeout(timerTimeoutPulang)
 
-		.col-s-6 {
-			width: 50%;
-		}
+                        $('#buttonPulang').attr('disabled', true)
+                        $('#buttonPulang').css('cursor', 'not-allowed')
+                    } else {
+                        alert('Gagal absen pulang, harap refresh halaman lalu coba lagi.')
+                    }
+                }
+            })
+        }
 
-		.col-s-7 {
-			width: 58.33%;
-		}
+        let filterKaryawanInputVal = $('#filter-karyawan').val()
+        let filterTglMulaiInputVal = $('#filter-tanggal-mulai').val()
+        let filterTglSampaiInputVal = $('#filter-tanggal-sampai').val()
+        const attendanceTable = $('#attendance-table').DataTable({
+            dom: "Bfrtip",
+            pageLength: 10,
+            ajax: {
+                url: '<?=site_url('user/get_attendance_history')?>',
+                type: 'POST',
+                data: function (d) {
+                    d.mulai=filterTglMulaiInputVal
+                    d.sampai=filterTglSampaiInputVal
+                    d.karyawan=filterKaryawanInputVal
+                }
+            },
+            columns: [
+                // {
+                //     data: null,
+                //     render: function (data, type, row, meta) {
+                //         return meta.row+1
+                //     }
+                // },
+                { data: 'nik' },
+                { data: 'nama' },
+                { data: 'hari' },
+                { data: 'tanggal' },
+                { data: 'jam_datang' },
+                { data: 'ip_datang' },
+                { data: 'jam_pulang' },
+                { data: 'ip_pulang' },
+                { data: 'keterangan' }
+            ],
+            order: [
+                [1, 'asc']
+            ]
+        })
 
-		.col-s-8 {
-			width: 66.66%;
-		}
+        refreshAttendanceTable = () => {
+            attendanceTable.ajax.reload()
+        }
+        
+        // filters
+        const filterKaryawanInput = $('#filter-karyawan')
+        const filterTglMulaiInput = $('#filter-tanggal-mulai')
+        const filterTglSampaiInput = $('#filter-tanggal-sampai')
+        filterKaryawanInput.change(function () {
+            filterKaryawanInputVal = $(this).val()
+            refreshAttendanceTable()
+        })
+        filterTglMulaiInput.change(function () {
+            filterTglMulaiInputVal = $(this).val()
+            refreshAttendanceTable()
+        })
+        filterTglSampaiInput.change(function () {
+            filterTglSampaiInputVal = $(this).val()
+            refreshAttendanceTable()
+        })
 
-		.col-s-9 {
-			width: 75%;
-		}
+        $('#report-pdf').click(function () {
+            const url = '<?=site_url('user/report_attendance_pdf')?>?mulai='+filterTglMulaiInputVal+'&sampai='+filterTglSampaiInputVal+'&karyawan='+filterKaryawanInputVal
 
-		.col-s-10 {
-			width: 83.33%;
-		}
-
-		.col-s-11 {
-			width: 91.66%;
-		}
-
-		.col-s-12 {
-			width: 100%;
-			margin-left: auto;
-			margin-right: auto;
-		}
-	}
-
-	@media only screen and (min-width: 768px) {
-
-		/* For desktop: */
-		.col-1 {
-			width: 8.33%;
-		}
-
-		.col-2 {
-			width: 16.66%;
-		}
-
-		.col-3 {
-			width: 25%;
-		}
-
-		.col-4 {
-			width: 33.33%;
-		}
-
-		.col-5 {
-			width: 41.66%;
-		}
-
-		.col-6 {
-			width: 50%;
-			margin-left: auto;
-			margin-right: auto;
-		}
-
-		.col-7 {
-			width: 58.33%;
-		}
-
-		.col-8 {
-			width: 66.66%;
-		}
-
-		.col-9 {
-			width: 75%;
-		}
-
-		.col-10 {
-			width: 83.33%;
-		}
-
-		.col-11 {
-			width: 91.66%;
-		}
-
-		.col-12 {
-			width: 100%;
-		}
-	}
-
-
-
-
-
-
-	.btn {
-		background-color: #fff;
-		border: none;
-		color: black;
-		padding: 8px 16px;
-		text-align: center;
-		font-size: 16px;
-		padding-bottom: -15px;
-		transition: 0.3s;
-		text-decoration: none;
-	}
-
-	.btn:hover {
-		background-color: #fff;
-		color: black;
-
-	}
-</style>
+            window.location.href = url
+        })
+	})
+</script>
